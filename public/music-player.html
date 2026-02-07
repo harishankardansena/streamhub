@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StreamHub Music Player</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        /* Specific styles for Music Player */
+        body {
+            background: #121212;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .header {
+            padding: 15px 20px;
+            background: #1e1e1e;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #333;
+        }
+
+        .header h1 {
+            font-size: 1.2rem;
+            margin: 0;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .player-controls {
+            background: #1e1e1e;
+            padding: 20px;
+            border-top: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .controls-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+
+        button.control-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        button.control-btn:hover {
+            color: var(--primary-color);
+        }
+
+        button.play-btn {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+        }
+
+        .progress-container {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        #playlist {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .track-item {
+            padding: 10px;
+            border-bottom: 1px solid #333;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .track-item:hover {
+            background: #2a2a2a;
+        }
+
+        .track-item.active {
+            color: var(--primary-color);
+            background: #2a2a2a;
+            border-left: 3px solid var(--primary-color);
+        }
+
+        .folder-setup {
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        .folder-btn {
+            background: var(--primary-color);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+
+        /* Qr Code & Room Info small at bottom right or top */
+        .room-info {
+            font-size: 0.8rem;
+            color: #888;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <span>🎵</span>
+            <h1>StreamHub Music</h1>
+        </div>
+        <div class="room-info">
+            Room: <span id="room-id" style="color:white; font-weight:bold;">Loading...</span>
+        </div>
+    </div>
+
+    <div class="main-content" id="main-view">
+
+        <!-- Initial State: Folder Selection -->
+        <div id="folder-selection" class="folder-setup">
+            <h2>Select Your Music Library</h2>
+            <p style="color: #aaa; margin-bottom: 20px;">
+                Choose a folder on your device containing your music files.<br>
+                We will create a playlist and stream it live.
+            </p>
+            <button class="folder-btn" onclick="document.getElementById('folder-input').click()">
+                📂 Select Music Folder
+            </button>
+            <input type="file" id="folder-input" webkitdirectory directory multiple style="display: none;"
+                onchange="handleFolderSelect(this)">
+        </div>
+
+        <!-- Playlist View (Hidden initially) -->
+        <div id="playlist-view" style="display: none;">
+            <ul id="playlist">
+                <!-- Tracks go here -->
+            </ul>
+        </div>
+
+    </div>
+
+    <!-- Player Footer -->
+    <div class="player-controls">
+        <div style="text-align: center; margin-bottom: 5px;">
+            <span id="current-track-title" style="font-weight: bold;">No track selected</span>
+        </div>
+
+        <div class="progress-container">
+            <span id="current-time">0:00</span>
+            <input type="range" id="seek-bar" value="0" min="0" step="1">
+            <span id="duration">0:00</span>
+        </div>
+
+        <div class="controls-row">
+            <button class="control-btn" onclick="playPrev()">⏮</button>
+            <button class="control-btn play-btn" id="play-pause-btn" onclick="togglePlay()">▶</button>
+            <button class="control-btn" onclick="playNext()">⏭</button>
+        </div>
+
+        <!-- Hidden Audio Element for Logic -->
+        <audio id="audio-element" style="display: none;"></audio>
+    </div>
+
+    <script src="music-player.js"></script>
+</body>
+
+</html>

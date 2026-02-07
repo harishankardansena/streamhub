@@ -25,6 +25,37 @@
 
         <div id="qrcode"></div>
 
+        <div class="controls-section" style="margin-top: 20px; text-align: center;">
+            <button id="start-btn" onclick="showModeSelection()"
+                style="padding: 15px 30px; font-size: 1.2em; cursor: pointer;">Start Broadcast</button>
+
+            <!-- Hidden File Input for Audio Mode -->
+            <input type="file" id="audio-file" accept="audio/*" style="display: none;"
+                onchange="handleFileSelection(this)">
+            <audio id="local-audio-player" controls style="width: 100%; margin-top: 10px; display: none;"></audio>
+        </div>
+
+        <!-- Mode Selection Modal -->
+        <div id="mode-modal" class="modal"
+            style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.8);">
+            <div class="modal-content"
+                style="background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 400px; border-radius: 10px; text-align: center;">
+                <h2 style="color: #333;">Choose Broadcast Mode</h2>
+                <div style="display: flex; justify-content: space-around; margin-top: 30px;">
+                    <button onclick="selectMode('screen')"
+                        style="padding: 15px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 5px;">
+                        🖥️ Screen Share
+                    </button>
+                    <button onclick="selectMode('audio')"
+                        style="padding: 15px; cursor: pointer; background: #28a745; color: white; border: none; border-radius: 5px;">
+                        🎵 Audio File
+                    </button>
+                </div>
+                <button onclick="closeModal()"
+                    style="margin-top: 20px; background: transparent; border: none; color: #999; cursor: pointer;">Cancel</button>
+            </div>
+        </div>
+
     </div>
 
     <script src="script.js"></script>
@@ -47,8 +78,38 @@
             height: 128
         });
 
-        // Initialize Broadcaster
-        initBroadcaster(room);
+        // Initialize Broadcaster logic is now handled by user interaction (Start button)
+        // OR by URL parameter from index.html
+
+        const modeParam = urlParams.get('mode');
+        if (modeParam === 'screen') {
+            // Auto-click the button or trigger logic?
+            // Better to trigger the mode selection logic directly, but we need the functions from script.js to be available.
+            // Since script.js is loaded before this script block, functions should be available.
+            // However, we want to perhaps hide the Start button if it's auto-starting? 
+            // Or just trigger the mode.
+
+            // Let's just click the hidden logic, but we need to wait for user interaction usually for GDM/Audio.
+            // Browsers block async calls like getDisplayMedia/AudioContext without user gesture.
+            // So we can't fully auto-start. We have to show a "Click to Start [Mode]" button or just rely on the existing Start button.
+
+            // Wait, the user wants "option popup" on index.html.
+            // So when they arrive here, they have effectively "chosen". A second click is annoying but might be necessary for browser permissions.
+            // Let's update the UI to say "Ready to Broadcast [Mode]" and the button says "Start".
+
+            // Actually, if we just run `startScreenShare()` it might fail if not trusted event.
+            // Let's try to update the start button to run the specific mode directly without popup.
+            document.getElementById('start-btn').onclick = () => selectMode('screen');
+            document.getElementById('start-btn').innerText = "Start Screen Share";
+
+        } else if (modeParam === 'system-audio') {
+            document.getElementById('start-btn').onclick = () => selectMode('system-audio');
+            document.getElementById('start-btn').innerText = "Start System Audio Capture";
+        } else if (modeParam === 'audio') {
+            document.getElementById('start-btn').onclick = () => selectMode('audio');
+            document.getElementById('start-btn').innerText = "Select Audio File";
+        }
+
     </script>
 </body>
 

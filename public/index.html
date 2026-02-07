@@ -23,15 +23,55 @@
             <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 20px 0;">
 
             <p style="font-size: 0.9rem; margin-bottom: 5px; opacity: 0.7;">Or start your own:</p>
-            <button onclick="startBroadcast()" style="width: 100%; max-width: 250px;">Start New Broadcast</button>
+            <button onclick="showModeSelection()" style="width: 100%; max-width: 250px;">Start New Broadcast</button>
+        </div>
+
+        <!-- Mode Selection Modal -->
+        <div id="mode-modal" class="modal"
+            style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.8);">
+            <div class="modal-content"
+                style="background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 400px; border-radius: 10px; text-align: center;">
+                <h2 style="color: #333;">Choose Broadcast Mode</h2>
+                <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 30px;">
+                    <button onclick="selectMode('screen')"
+                        style="padding: 15px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 5px;">
+                        🖥️ Screen Share (Video + Audio)
+                    </button>
+                    <button onclick="selectMode('system-audio')"
+                        style="padding: 15px; cursor: pointer; background: #6c757d; color: white; border: none; border-radius: 5px;">
+                        🔊 System/App Audio (Experimental on Mobile)
+                    </button>
+                    <button onclick="selectMode('audio')"
+                        style="padding: 15px; cursor: pointer; background: #28a745; color: white; border: none; border-radius: 5px;">
+                        🎵 Audio File (Local Upload)
+                    </button>
+                </div>
+                <button onclick="closeModal()"
+                    style="margin-top: 20px; background: transparent; border: none; color: #999; cursor: pointer;">Cancel</button>
+            </div>
         </div>
     </div>
 
     <script>
-        function startBroadcast() {
+        const modal = document.getElementById("mode-modal");
+
+        function showModeSelection() {
+            modal.style.display = "block";
+        }
+
+        function closeModal() {
+            modal.style.display = "none";
+        }
+
+        function selectMode(mode) {
             // Generate a random unique 6-character room ID
             const uniqueRoom = Math.random().toString(36).substring(2, 8).toUpperCase();
-            window.location.href = `/broadcast.html?room=${uniqueRoom}`;
+
+            if (mode === 'audio') {
+                window.location.href = `/music-player.html?room=${uniqueRoom}`;
+            } else {
+                window.location.href = `/broadcast.html?room=${uniqueRoom}&mode=${mode}`;
+            }
         }
 
         function joinWatch() {

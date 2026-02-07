@@ -173,24 +173,45 @@ function formatTime(seconds) {
 // ==========================================
 // BROADCAST LOGIC (WebRTC)
 // ==========================================
-function initStream() {
-    // Capture stream from audio element
-    let stream;
-    if (audioElement.captureStream) {
-        stream = audioElement.captureStream();
-    } else if (audioElement.mozCaptureStream) {
-        stream = audioElement.mozCaptureStream();
-    } else {
-        alert("Your browser does not support audio capture.");
-        return;
-    }
+// Web Audio API Context
+let audioContext;
+let dest;
+let sourceNode;
 
-    currentStream = stream;
-    console.log("Music Stream Started");
+function initStream() {
+    if (currentStream) return; // Already started
+
+    // Create Audio Context
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    audioContext = new AudioContext();
+
+    // Create MediaStream Destination (this will be our stream)
+    dest = audioContext.createMediaStreamDestination();
+
+    // Create Source from Audio Element
+    // WE MUST DO THIS ONCE. Re-creating it causes errors.
+    sourceNode = audioContext.createMediaElementSource(audioElement);
+
+    // Connect Source -> Destination (Stream)
+    sourceNode.connect(dest);
+
+    // Connect Source -> Speakers (so broadcaster can hear it)
+    sourceNode.connect(audioContext.destination);
+
+    // Get the stream
+    currentStream = dest.stream;
+    console.log("Music Stream Started via Web Audio API");
 
     // Notify Server
     socket.emit("broadcaster", room);
 }
+
+// Ensure Audio Context is resumed on user interaction (browser policy)
+document.body.addEventListener('click', () => {
+    if (audioContext && audioContext.state === 'suspended') {
+        audioContext.resume();
+    }
+}, { once: true });
 
 // Watcher joins -> Create PeerConnection
 socket.on("watcher", (id) => {

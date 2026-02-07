@@ -9,13 +9,17 @@ app.use(express.static(__dirname + "/public"));
 
 // ICE Configuration Endpoint
 app.get("/api/ice-config", (req, res) => {
-    // Default STUN servers (Free & Public)
+    // Default STUN servers (Free & Public) - Extensive List for better Global Reach from server
     let iceServers = [
         { urls: "stun:stun.l.google.com:19302" },
         { urls: "stun:stun1.l.google.com:19302" },
         { urls: "stun:stun2.l.google.com:19302" },
         { urls: "stun:stun3.l.google.com:19302" },
-        { urls: "stun:stun4.l.google.com:19302" }
+        { urls: "stun:stun4.l.google.com:19302" },
+        { urls: "stun:global.stun.twilio.com:3478" },
+        { urls: "stun:stun.stunprotocol.org:3478" },
+        { urls: "stun:stun.framasoft.org:3478" },
+        { urls: "stun:stun.voip.blackberry.com:3478" }
     ];
 
     // Add TURN server if configured in Environment Variables

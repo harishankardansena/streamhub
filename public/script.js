@@ -326,8 +326,16 @@ function initViewer(room) {
         peerConnection.oniceconnectionstatechange = () => {
             log(`ICE State: ${peerConnection.iceConnectionState}`);
             if (peerConnection.iceConnectionState === 'disconnected' || peerConnection.iceConnectionState === 'failed') {
-                statusText.innerText = "Status: Connection Failed. \nEnsure both devices are on the SAME WiFi or try disabling Firewall.";
+                statusText.innerText = "Status: Connection Failed (NAT/Firewall).";
                 statusText.style.color = "red";
+                log("Connection failed. Asking user to retry...");
+
+                // Show retry button
+                const retryBtn = document.createElement("button");
+                retryBtn.innerText = "🔄 Retry Connection (Different Route)";
+                retryBtn.style.marginTop = "10px";
+                retryBtn.onclick = () => window.location.reload();
+                document.getElementById('status-container').appendChild(retryBtn);
             }
         };
     });

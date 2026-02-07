@@ -7,6 +7,30 @@ const io = require("socket.io")(server);
 // Serve static files from 'public' directory
 app.use(express.static(__dirname + "/public"));
 
+// ICE Configuration Endpoint
+app.get("/api/ice-config", (req, res) => {
+    // Default STUN servers (Free & Public)
+    let iceServers = [
+        { urls: "stun:stun.l.google.com:19302" },
+        { urls: "stun:stun1.l.google.com:19302" },
+        { urls: "stun:stun2.l.google.com:19302" },
+        { urls: "stun:stun3.l.google.com:19302" },
+        { urls: "stun:stun4.l.google.com:19302" }
+    ];
+
+    // Add TURN server if configured in Environment Variables
+    if (process.env.TURN_URL && process.env.TURN_USERNAME && process.env.TURN_CREDENTIAL) {
+        iceServers.push({
+            urls: process.env.TURN_URL,
+            username: process.env.TURN_USERNAME,
+            credential: process.env.TURN_CREDENTIAL
+        });
+        console.log("TURN Server configured and sent to client.");
+    }
+
+    res.json({ iceServers });
+});
+
 io.sockets.on("error", (e) => console.log(e));
 
 io.sockets.on("connection", (socket) => {

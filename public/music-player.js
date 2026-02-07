@@ -5,11 +5,21 @@ if (!window.isSecureContext) {
     alert("Warning: Insecure connection (HTTP) detected.\nStreaming might fail on mobile devices. Please use HTTPS or localhost.");
 }
 
-const peerConnectConfig = {
+// Config for STUN servers (Default to Google, will be updated from server)
+let peerConnectConfig = {
     iceServers: [
         { urls: "stun:stun.l.google.com:19302" }
     ]
 };
+
+// Fetch ICE Config from Server
+fetch('/api/ice-config')
+    .then(response => response.json())
+    .then(config => {
+        peerConnectConfig = config.iceServers ? { iceServers: config.iceServers } : peerConnectConfig;
+        console.log("ICE Configuration Loaded:", peerConnectConfig);
+    })
+    .catch(err => console.error("Failed to load ICE config, using default STUN.", err));
 
 let peerConnections = {};
 const audioElement = document.getElementById('audio-element');

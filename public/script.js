@@ -10,12 +10,21 @@ if (!window.isSecureContext) {
         "3. For local mobile testing, you might need to enable 'Insecure origins treated as secure' in chrome://flags.");
 }
 
-// Config for STUN servers (Google's public STUN)
-const peerConnectConfig = {
+// Config for STUN servers (Default to Google, will be updated from server)
+let peerConnectConfig = {
     iceServers: [
         { urls: "stun:stun.l.google.com:19302" }
     ]
 };
+
+// Fetch ICE Config from Server
+fetch('/api/ice-config')
+    .then(response => response.json())
+    .then(config => {
+        peerConnectConfig = config.iceServers ? { iceServers: config.iceServers } : peerConnectConfig;
+        console.log("ICE Configuration Loaded:", peerConnectConfig);
+    })
+    .catch(err => console.error("Failed to load ICE config, using default STUN.", err));
 
 let peerConnections = {}; // Store connections for broadcaster (socketId -> RTCPeerConnection)
 let peerConnection; // Single connection for viewer
@@ -295,12 +304,17 @@ function initViewer(room) {
             .catch(e => log(`Error handling offer: ${e}`));
 
         peerConnection.ontrack = event => {
-            log("Track received!");
-            videoElement.srcObject = event.streams[0];
-            statusText.innerText = "Status: Live";
+            const stream = event.streams[0];
+            if (videoElement.srcObject !== stream) {
+                log("Track received! Setting new stream...");
+                videoElement.srcObject = stream;
+                statusText.innerText = "Status: Live";
 
-            // Try explicit play for mobile
-            videoElement.play().catch(e => log(`Autoplay failed: ${e}`));
+                // Try explicit play for mobile
+                videoElement.play().catch(e => log(`Autoplay failed: ${e}`));
+            } else {
+                log("Track received (stream already playing).");
+            }
         };
 
         peerConnection.onicecandidate = event => {
@@ -311,8 +325,9 @@ function initViewer(room) {
 
         peerConnection.oniceconnectionstatechange = () => {
             log(`ICE State: ${peerConnection.iceConnectionState}`);
-            if (peerConnection.iceConnectionState === 'disconnected') {
-                statusText.innerText = "Status: Disconnected";
+            if (peerConnection.iceConnectionState === 'disconnected' || peerConnection.iceConnectionState === 'failed') {
+                statusText.innerText = "Status: Connection Failed. \nEnsure both devices are on the SAME WiFi or try disabling Firewall.";
+                statusText.style.color = "red";
             }
         };
     });

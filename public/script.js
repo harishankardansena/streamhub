@@ -254,13 +254,34 @@ socket.on("disconnectPeer", (id) => {
 // ==========================================
 // VIEWER LOGIC
 // ==========================================
+function log(msg) {
+    const logEl = document.getElementById('debug-log');
+    if (logEl) {
+        logEl.innerText += `\n${msg}`;
+        console.log(msg);
+    }
+}
+
+function startViewer() {
+    document.getElementById('connect-overlay').style.display = 'none';
+    const room = new URLSearchParams(window.location.search).get('room');
+    if (room) {
+        initViewer(room);
+    } else {
+        alert("No room ID found!");
+    }
+}
+
 function initViewer(room) {
+    log(`Initializing viewer for room: ${room}`);
     socket.emit("watcher", room);
     const videoElement = document.getElementById("video");
     const statusText = document.getElementById("status");
 
     socket.on("offer", (id, description) => {
-        statusText.innerText = "Connecting to stream...";
+        statusText.innerText = "Status: Connecting...";
+        log("Received offer from broadcaster");
+
         peerConnection = new RTCPeerConnection(peerConnectConfig);
 
         peerConnection
@@ -269,11 +290,17 @@ function initViewer(room) {
             .then(sdp => peerConnection.setLocalDescription(sdp))
             .then(() => {
                 socket.emit("answer", id, peerConnection.localDescription);
-            });
+                log("Sent answer to broadcaster");
+            })
+            .catch(e => log(`Error handling offer: ${e}`));
 
         peerConnection.ontrack = event => {
+            log("Track received!");
             videoElement.srcObject = event.streams[0];
-            statusText.innerText = "Live";
+            statusText.innerText = "Status: Live";
+
+            // Try explicit play for mobile
+            videoElement.play().catch(e => log(`Autoplay failed: ${e}`));
         };
 
         peerConnection.onicecandidate = event => {
@@ -281,20 +308,30 @@ function initViewer(room) {
                 socket.emit("candidate", id, event.candidate);
             }
         };
+
+        peerConnection.oniceconnectionstatechange = () => {
+            log(`ICE State: ${peerConnection.iceConnectionState}`);
+            if (peerConnection.iceConnectionState === 'disconnected') {
+                statusText.innerText = "Status: Disconnected";
+            }
+        };
     });
 
     socket.on("candidate", (id, candidate) => {
-        peerConnection
-            .addIceCandidate(new RTCIceCandidate(candidate))
-            .catch(e => console.error(e));
+        if (peerConnection) {
+            peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
+                .catch(e => log(`Error adding candidate: ${e}`));
+        }
     });
 
     socket.on("broadcaster", () => {
-        socket.emit("watcher", room); // Retry connection if broadcaster reconnects
+        log("Broadcaster available. Sending watcher request...");
+        socket.emit("watcher", room);
     });
 
     socket.on("broadcaster_left", () => {
-        statusText.innerText = "Broadcaster ended the stream.";
+        statusText.innerText = "Status: Broadcaster ended the stream.";
+        log("Broadcaster left");
         videoElement.srcObject = null;
         if (peerConnection) peerConnection.close();
     });

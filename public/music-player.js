@@ -1,4 +1,10 @@
 const socket = io();
+
+// Check for Secure Context
+if (!window.isSecureContext) {
+    alert("Warning: Insecure connection (HTTP) detected.\nStreaming might fail on mobile devices. Please use HTTPS or localhost.");
+}
+
 const peerConnectConfig = {
     iceServers: [
         { urls: "stun:stun.l.google.com:19302" }
@@ -22,6 +28,21 @@ let currentStream = null;
 const urlParams = new URLSearchParams(window.location.search);
 const room = urlParams.get('room') || 'music-room';
 document.getElementById('room-id').textContent = room;
+
+// Viewer Tracking
+let viewerCount = 0;
+const headerEl = document.querySelector('.header');
+const viewerCountEl = document.createElement('span');
+viewerCountEl.style.fontSize = '0.9rem';
+viewerCountEl.style.marginLeft = '10px';
+viewerCountEl.innerText = '👁️ 0 Viewers';
+headerEl.querySelector('div:last-child').appendChild(viewerCountEl);
+
+function updateViewerCount(diff) {
+    viewerCount += diff;
+    if (viewerCount < 0) viewerCount = 0;
+    viewerCountEl.innerText = `👁️ ${viewerCount} Viewers`;
+}
 
 // ==========================================
 // PLAYLIST LOGIC
@@ -168,6 +189,9 @@ socket.on("watcher", (id) => {
     const peerConnection = new RTCPeerConnection(peerConnectConfig);
     peerConnections[id] = peerConnection;
 
+    // Update Viewer Count
+    updateViewerCount(1);
+
     currentStream.getTracks().forEach(track => peerConnection.addTrack(track, currentStream));
 
     peerConnection.onicecandidate = event => {
@@ -201,5 +225,6 @@ socket.on("disconnectPeer", (id) => {
     if (peerConnections[id]) {
         peerConnections[id].close();
         delete peerConnections[id];
+        updateViewerCount(-1);
     }
 });

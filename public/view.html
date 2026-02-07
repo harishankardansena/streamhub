@@ -15,8 +15,24 @@
         <p>Connected to room: <span id="room-display" style="color: var(--primary-color); font-weight: bold;">...</span>
         </p>
 
-        <video id="video" playsinline autoplay controls></video>
-        <p id="status">Waiting for broadcaster...</p>
+        <div id="connect-overlay"
+            style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10;">
+            <button onclick="startViewer()"
+                style="font-size: 1.5rem; padding: 20px 40px; background: var(--primary-color); color: white; border: none; border-radius: 10px; cursor: pointer;">
+                ▶ Click to Watch Stream
+            </button>
+            <p style="color: #ccc; margin-top: 10px;">(Required for mobile/audio playback)</p>
+        </div>
+
+        <video id="video" playsinline autoplay controls
+            style="width: 100%; max-height: 80vh; background: #000;"></video>
+        <div id="status-container"
+            style="margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 5px;">
+            <p id="status" style="margin: 0; font-weight: bold;">Status: Idle</p>
+            <p id="debug-log"
+                style="font-size: 0.8rem; color: #aaa; margin-top: 5px; max-height: 100px; overflow-y: auto;">Waiting
+                for user...</p>
+        </div>
     </div>
 
     <script src="script.js"></script>
@@ -25,7 +41,8 @@
         const room = urlParams.get('room') || 'default';
         document.getElementById('room-display').textContent = room;
 
-        initViewer(room);
+        // initViewer(room); // Removed to enforce button click
+        document.getElementById('room-display').textContent = room;
     </script>
 </body>
 

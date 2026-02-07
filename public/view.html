@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Viewer - StreamHub</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Watching Stream</h1>
+        <p>Connected to room: <span id="room-display" style="color: var(--primary-color); font-weight: bold;">...</span>
+        </p>
+
+        <video id="video" playsinline autoplay controls></video>
+        <p id="status">Waiting for broadcaster...</p>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const room = urlParams.get('room') || 'default';
+        document.getElementById('room-display').textContent = room;
+
+        initViewer(room);
+    </script>
+</body>
+
+</html>

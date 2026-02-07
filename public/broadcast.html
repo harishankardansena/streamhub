@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Broadcaster - StreamHub</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <h1>On Air</h1>
+        <p>You are broadcasting to room: <span id="room-display"
+                style="color: var(--primary-color); font-weight: bold;">...</span></p>
+
+        <video id="video" playsinline autoplay muted></video>
+
+        <div class="link-container">
+            <p>Share this link to invite viewers:</p>
+            <a id="share-link" href="#" target="_blank" style="color: var(--secondary-color);">Loading...</a>
+        </div>
+
+        <div id="qrcode"></div>
+
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Init logic specifically for broadcaster UI
+        const urlParams = new URLSearchParams(window.location.search);
+        const room = urlParams.get('room') || 'default';
+        document.getElementById('room-display').textContent = room;
+
+        // Generate Share Link
+        const shareUrl = `${window.location.origin}/view.html?room=${room}`;
+        const linkEl = document.getElementById('share-link');
+        linkEl.href = shareUrl;
+        linkEl.textContent = shareUrl;
+
+        // Generate QR Code
+        new QRCode(document.getElementById("qrcode"), {
+            text: shareUrl,
+            width: 128,
+            height: 128
+        });
+
+        // Initialize Broadcaster
+        initBroadcaster(room);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,145 @@
+:root {
+  --primary-color: #00f2ea;
+  --secondary-color: #ff0050;
+  --bg-color: #0f0f13;
+  --card-bg: rgba(255, 255, 255, 0.05);
+  --text-color: #ffffff;
+  --font-family: 'Inter', sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family);
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.container {
+  text-align: center;
+  padding: 2rem;
+  background: var(--card-bg);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  max-width: 800px;
+  width: 90%;
+  box-sizing: border-box;
+  /* Ensure padding doesn't overflow width */
+}
+
+h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Mobile Responsive Inputs & Buttons */
+input,
+button,
+select {
+  padding: 12px 20px;
+  margin: 10px 0;
+  /* Stack vertically on small screens */
+  border-radius: 8px;
+  border: none;
+  font-size: 1rem;
+  outline: none;
+  width: 100%;
+  /* Full width on mobile */
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Desktop override for button/input width if needed */
+@media (min-width: 768px) {
+
+  input,
+  button {
+    width: auto;
+    min-width: 200px;
+    margin: 10px;
+  }
+}
+
+input {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+button {
+  cursor: pointer;
+  background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+  color: white;
+  font-weight: bold;
+  transition: transform 0.2s;
+}
+
+button:hover {
+  transform: scale(1.05);
+}
+
+button:active {
+  transform: scale(0.95);
+}
+
+video {
+  width: 100%;
+  max-width: 100%;
+  border-radius: 12px;
+  background: black;
+  margin-top: 20px;
+  border: 2px solid var(--card-bg);
+  box-shadow: 0 0 20px rgba(0, 242, 234, 0.3);
+}
+
+.hidden {
+  display: none;
+}
+
+#qrcode {
+  margin: 20px auto;
+  padding: 10px;
+  background: white;
+  width: fit-content;
+  border-radius: 8px;
+}
+
+#qrcode img {
+  margin: 0 auto;
+}
+
+.link-container {
+  margin-top: 20px;
+  word-break: break-all;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 15px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+/* Mobile specific adjustments */
+@media (max-width: 480px) {
+  .container {
+    padding: 1.5rem;
+    width: 100%;
+    min-height: 100vh;
+    border-radius: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
+}
